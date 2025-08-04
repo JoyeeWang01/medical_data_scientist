@@ -2,29 +2,22 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
-  <!-- Replace the content tag with appropriate information -->
-  <meta name="description" content="DESCRIPTION META TAG">
-  <meta property="og:title" content="SOCIAL MEDIA TITLE TAG"/>
-  <meta property="og:description" content="SOCIAL MEDIA DESCRIPTION TAG TAG"/>
-  <meta property="og:url" content="URL OF THE WEBSITE"/>
-  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X630-->
-  <meta property="og:image" content="static/image/your_banner_image.png" />
+  <meta name="description" content="SNOW: Agent-Based Feature Generation from Clinical Notes for Outcome Prediction - A modular multi-agent system powered by LLMs that autonomously generates structured clinical features from unstructured notes without human intervention.">
+  <meta property="og:title" content="SNOW: Agent-Based Feature Generation from Clinical Notes"/>
+  <meta property="og:description" content="A fully automated system matching expert-level feature engineering for clinical ML models"/>
+  <meta property="og:url" content="https://stanford-snow.github.io"/>
+  <meta property="og:image" content="static/images/snow_banner.png" />
   <meta property="og:image:width" content="1200"/>
   <meta property="og:image:height" content="630"/>
 
-
-  <meta name="twitter:title" content="TWITTER BANNER TITLE META TAG">
-  <meta name="twitter:description" content="TWITTER BANNER DESCRIPTION META TAG">
-  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
-  <meta name="twitter:image" content="static/images/your_twitter_banner_image.png">
+  <meta name="twitter:title" content="SNOW: Agent-Based Feature Generation from Clinical Notes">
+  <meta name="twitter:description" content="Autonomous LLM system achieves expert-level clinical feature generation without human intervention">
+  <meta name="twitter:image" content="static/images/snow_banner.png">
   <meta name="twitter:card" content="summary_large_image">
-  <!-- Keywords for your paper to be indexed by-->
-  <meta name="keywords" content="KEYWORDS SHOULD BE PLACED HERE">
+  <meta name="keywords" content="SNOW, Clinical AI, Feature Generation, LLM, Medical AI, Prostate Cancer, Electronic Health Records, Multi-Agent Systems">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
-  <title>Academic Project Page</title>
+  <title>SNOW: Agent-Based Feature Generation from Clinical Notes</title>
   <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
   rel="stylesheet">
@@ -42,7 +35,197 @@
   <script defer src="static/js/fontawesome.all.min.js"></script>
   <script src="static/js/bulma-carousel.min.js"></script>
   <script src="static/js/bulma-slider.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="static/js/index.js"></script>
+
+  <!-- React App CSS -->
+  <link rel="stylesheet" crossorigin href="static/index-Dc-8qhMi.css">
+
+  <!-- React App JavaScript -->
+  <script type="module" crossorigin src="static/index-1CXzPiw6.js"></script>
+  
+  <style>
+    .workflow-container {
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      padding: 40px;
+      margin: 30px 0;
+    }
+    
+    .agent-node {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    
+    .agent-node:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+    
+    .agent-node.active {
+      background: #fffbeb;
+      border: 2px solid #f59e0b;
+    }
+    
+    .validation-example {
+      background: #f3f4f6;
+      border-left: 4px solid #3b82f6;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    
+    .feature-table {
+      overflow-x: auto;
+    }
+    
+    .feature-table table {
+      min-width: 800px;
+    }
+    
+    .result-chart {
+      min-height: 400px;
+      margin: 20px 0;
+    }
+    
+    .workflow-node:hover .agent-box,
+    .workflow-outcome:hover .outcome-circle {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      border-color: #3b82f6;
+    }
+    
+    .workflow-node.active .agent-box {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      transform: translateY(-3px);
+    }
+    
+    .workflow-outcome.active .outcome-circle {
+      border-color: #f59e0b;
+      transform: translateY(-3px) scale(1.05);
+    }
+    
+    .workflow-node,
+    .workflow-outcome {
+      transition: all 0.3s ease;
+    }
+    
+    .workflow-canvas {
+      width: 100%;
+      height: 450px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+    }
+    
+    .workflow-canvas:active {
+      cursor: grabbing;
+    }
+    
+    .zoom-controls {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      gap: 5px;
+      z-index: 10;
+    }
+    
+    .zoom-btn {
+      width: 35px;
+      height: 35px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    
+    .zoom-btn:hover {
+      background: #f3f4f6;
+      transform: translateY(-1px);
+    }
+    
+    .zoom-level {
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #374151;
+    }
+    
+    .agent-detail-section {
+      padding: 20px;
+    }
+    
+    .agent-detail-section h5 {
+      margin-top: 20px !important;
+      margin-bottom: 10px !important;
+      font-size: 1.1rem !important;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 5px;
+    }
+    
+    .agent-detail-section h5:first-child {
+      margin-top: 0 !important;
+    }
+    
+    .agent-detail-section ul {
+      margin-left: 0;
+      padding-left: 0;
+    }
+    
+    .agent-detail-section li {
+      background: #f8fafc;
+      margin: 8px 0;
+      padding: 12px 16px;
+      border-left: 4px solid #3b82f6;
+      border-radius: 4px;
+      list-style: none;
+    }
+    
+    .agent-detail-section li strong {
+      color: #1f2937;
+    }
+    
+    .agent-detail-section p {
+      line-height: 1.6;
+      margin-bottom: 15px;
+      color: #374151;
+    }
+    
+    #agent-details.box {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .key-discoveries .title.is-5 {
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .key-discoveries .title.is-5 + p {
+      margin-top: 0 !important;
+    }
+  </style>
+
 </head>
 <body>
 
@@ -52,68 +235,60 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <h1 class="title is-1 publication-title">Academic Project Page</h1>
+            <h1 class="title is-1 publication-title">SNOW: Agent-Based Feature Generation from Clinical Notes for Outcome Prediction</h1>
             <div class="is-size-5 publication-authors">
               <!-- Paper authors -->
               <span class="author-block">
-                <a href="FIRST AUTHOR PERSONAL LINK" target="_blank">First Author</a><sup>*</sup>,</span>
-                <span class="author-block">
-                  <a href="SECOND AUTHOR PERSONAL LINK" target="_blank">Second Author</a><sup>*</sup>,</span>
-                  <span class="author-block">
-                    <a href="THIRD AUTHOR PERSONAL LINK" target="_blank">Third Author</a>
-                  </span>
-                  </div>
+                <a href="#">Jiayi Wang</a><sup>1,*</sup>,</span>
+              <span class="author-block">
+                <a href="#">Jacqueline Jil Vallon</a><sup>1</sup>,</span>
+              <span class="author-block">
+                <a href="#">Neil Panjwani</a><sup>2</sup>,</span>
+              <span class="author-block">
+                <a href="#">Xi Ling</a><sup>2</sup>,</span>
+              <span class="author-block">
+                <a href="#">Sushmita Vij</a><sup>3</sup>,</span>
+              <span class="author-block">
+                <a href="#">Sandy Srinivas</a><sup>4</sup>,</span>
+              <span class="author-block">
+                <a href="#">John Leppert</a><sup>5,6,7</sup>,</span>
+              <span class="author-block">
+                <a href="#">Mark K. Buyyounouski</a><sup>2,†</sup>,</span>
+              <span class="author-block">
+                <a href="#">Mohsen Bayati</a><sup>2,8,9,†</sup>
+              </span>
+            </div>
 
-                  <div class="is-size-5 publication-authors">
-                    <span class="author-block">Institution Name<br>Conferance name and year</span>
-                    <span class="eql-cntrb"><small><br><sup>*</sup>Indicates Equal Contribution</small></span>
-                  </div>
+            <div class="is-size-6 publication-authors" style="margin-top: 15px;">
+              <span class="author-block"><sup>1</sup>Department of Management Science and Engineering, Stanford University</span><br>
+              <span class="author-block"><sup>2</sup>Department of Radiation Oncology, Stanford University School of Medicine</span><br>
+              <span class="author-block"><sup>3</sup>Graduate Business School Research Hub, Stanford University</span><br>
+              <span class="author-block"><sup>4</sup>Department of Medicine (Oncology), Stanford University</span><br>
+              <span class="author-block"><sup>5</sup>Department of Medicine, Stanford University</span><br>
+              <span class="author-block"><sup>6</sup>Department of Urology, Stanford University</span><br>
+              <span class="author-block"><sup>7</sup>Veterans Affairs Palo Alto Health Care System</span><br>
+              <span class="author-block"><sup>8</sup>Department of Electrical Engineering, Stanford University</span><br>
+              <span class="author-block"><sup>9</sup>Operations, Information and Technology, Stanford Graduate Business School</span>
+            </div>
+            
+            <div class="is-size-6 publication-authors" style="margin-top: 10px;">
+              <span class="author-block"><sup>*</sup>Corresponding author. Email: jyw@stanford.edu</span><br>
+              <span class="author-block"><sup>†</sup>Served as equally contributing co-senior authors</span>
+            </div>
 
-                  <div class="column has-text-centered">
-                    <div class="publication-links">
-                         <!-- Arxiv PDF link -->
-                      <span class="link-block">
-                        <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
-                        class="external-link button is-normal is-rounded is-dark">
-                        <span class="icon">
-                          <i class="fas fa-file-pdf"></i>
-                        </span>
-                        <span>Paper</span>
-                      </a>
-                    </span>
-
-                    <!-- Supplementary PDF link -->
-                    <span class="link-block">
-                      <a href="static/pdfs/supplementary_material.pdf" target="_blank"
-                      class="external-link button is-normal is-rounded is-dark">
-                      <span class="icon">
-                        <i class="fas fa-file-pdf"></i>
-                      </span>
-                      <span>Supplementary</span>
-                    </a>
-                  </span>
-
-                  <!-- Github link -->
-                  <span class="link-block">
-                    <a href="https://github.com/YOUR REPO HERE" target="_blank"
-                    class="external-link button is-normal is-rounded is-dark">
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link -->
+                <span class="link-block">
+                  <a href="patient_level_2025.pdf"
+                     class="external-link button is-normal is-rounded is-dark">
                     <span class="icon">
-                      <i class="fab fa-github"></i>
+                        <i class="fas fa-file-pdf"></i>
                     </span>
-                    <span>Code</span>
+                    <span>Paper</span>
                   </a>
                 </span>
 
-                <!-- ArXiv abstract Link -->
-                <span class="link-block">
-                  <a href="https://arxiv.org/abs/<ARXIV PAPER ID>" target="_blank"
-                  class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                    <i class="ai ai-arxiv"></i>
-                  </span>
-                  <span>arXiv</span>
-                </a>
-              </span>
             </div>
           </div>
         </div>
@@ -121,24 +296,6 @@
     </div>
   </div>
 </section>
-
-
-<!-- Teaser video-->
-<section class="hero teaser">
-  <div class="container is-max-desktop">
-    <div class="hero-body">
-      <video poster="" id="tree" autoplay controls muted loop height="100%">
-        <!-- Your video here -->
-        <source src="static/videos/banner_video.mp4"
-        type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        Aliquam vitae elit ullamcorper tellus egestas pellentesque. Ut lacus tellus, maximus vel lectus at, placerat pretium mi. Maecenas dignissim tincidunt vestibulum. Sed consequat hendrerit nisl ut maximus. 
-      </h2>
-    </div>
-  </div>
-</section>
-<!-- End teaser video -->
 
 <!-- Paper abstract -->
 <section class="section hero is-light">
@@ -148,7 +305,13 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ullamcorper tellus sed ante aliquam tempus. Etiam porttitor urna feugiat nibh elementum, et tempor dolor mattis. Donec accumsan enim augue, a vulputate nisi sodales sit amet. Proin bibendum ex eget mauris cursus euismod nec et nibh. Maecenas ac gravida ante, nec cursus dui. Vivamus purus nibh, placerat ac purus eget, sagittis vestibulum metus. Sed vestibulum bibendum lectus gravida commodo. Pellentesque auctor leo vitae sagittis suscipit.
+            Electronic health records (EHRs) contain rich unstructured clinical notes that could enhance predictive modeling, yet extracting meaningful features from these notes remains challenging. Current approaches range from labor-intensive manual clinician feature generation (CFG) to fully automated representational feature generation (RFG) that lack interpretability and clinical relevance. 
+          </p>
+          <p>
+            Here we introduce <strong>SNOW (Scalable Note-to-Outcome Workflow)</strong>, a modular multi-agent system powered by large language models (LLMs) that autonomously generates structured clinical features from unstructured notes without human intervention. We evaluated SNOW against manual CFG, clinician-guided LLM approaches, and RFG methods for predicting 5-year prostate cancer recurrence in 147 patients from Stanford Healthcare.
+          </p>
+          <p>
+            While manual CFG achieved the highest performance (AUC-ROC: 0.771 ± 0.036), SNOW matched this performance (0.761 ± 0.046) without requiring any clinical expertise, significantly outperforming both baseline features alone (0.691 ± 0.079) and all RFG approaches. SNOW's specialized agents handle feature discovery, extraction, validation, post-processing, and aggregation, creating interpretable features that capture complex clinical information typically accessible only through manual review.
           </p>
         </div>
       </div>
@@ -158,127 +321,331 @@
 <!-- End paper abstract -->
 
 
-<!-- Image carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <!-- Your image here -->
-        <img src="static/images/carousel1.jpg" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          First image description.
-        </h2>
+<!-- SNOW Workflow Visualization -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Scalable Note-to-Outcome Workflow (SNOW)</h2>
+    <p class="has-text-centered subtitle">Interactive workflow diagram - click on nodes to learn more</p>
+    
+    <div class="workflow-canvas" id="workflow-canvas">
+      <!-- Zoom controls -->
+      <div class="zoom-controls">
+        <div class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</div>
+        <div class="zoom-level" id="zoom-level">100%</div>
+        <div class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</div>
+        <div class="zoom-btn" onclick="resetView()" title="Reset View">⌂</div>
       </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="static/images/carousel2.jpg" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          Second image description.
-        </h2>
-      </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="static/images/carousel3.jpg" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-         Third image description.
-       </h2>
-     </div>
-     <div class="item">
-      <!-- Your image here -->
-      <img src="static/images/carousel4.jpg" alt="MY ALT TEXT"/>
-      <h2 class="subtitle has-text-centered">
-        Fourth image description.
-      </h2>
+      
+      <!-- SVG Canvas -->
+      <svg id="workflow-svg" width="100%" height="100%">
+        <defs>
+          <!-- Arrow markers -->
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+          </marker>
+          
+          <!-- Gradients -->
+          <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="tealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0f766e;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        
+        <!-- Main workflow group -->
+        <g id="workflow-group">
+          <!-- Professional gradient background -->
+          <defs>
+            <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#f1f5f9;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+        </g>
+      </svg>
+    </div>
+    
+    <div id="agent-details" class="box" style="display: none; margin-top: 20px;">
+      <h4 class="title is-4" id="agent-title"></h4>
+      <div id="agent-description"></div>
     </div>
   </div>
-</div>
-</div>
 </section>
-<!-- End image carousel -->
 
-
-
-
-<!-- Youtube video -->
-<section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container">
-      <!-- Paper video. -->
-      <h2 class="title is-3">Video Presentation</h2>
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
+<!-- Validation Example -->
+<section class="section" style="background-color: #f9fafb;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Validation Process Example</h2>
+    <p class="has-text-centered subtitle">See how SNOW validates and refines feature extraction</p>
+    
+    <div class="validation-example">
+      <h4 class="title is-5">Feature: percent_core_involvement_left_apex_medial</h4>
+      
+      <div class="content">
+        <p><strong>Validation Attempt #1:</strong></p>
+        <div class="box">
+          <p class="has-text-weight-semibold">Agent Analysis:</p>
+          <p>Examining clinical notes with non-zero values to verify extraction accuracy:</p>
+          <ul>
+            <li>Note 0: "PROSTATIC ADENOCARCINOMA, GLEASON SCORE 3+3 = 6, COMPRISING 50% OF THE CORE"<br>
+                <span class="has-text-success">✓ Extracted value: 50.0 (matches exactly)</span></li>
+            <li>Note 2: "PROSTATIC ADENOCARCINOMA, GLEASON SCORE 3+4=7, INVOLVING 60% OF THE CORE"<br>
+                <span class="has-text-success">✓ Extracted value: 60.0 (matches exactly)</span></li>
+            <li>Note 74: "PROSTATE ADENOCARCINOMA, GLEASON SCORE 4 + 4 = 8, 1.0 CM"<br>
+                <span class="has-text-warning">⚠ Extracted value: NaN (no percentage, only length measurement)</span></li>
+            <li>Note 105: "PROSTATIC ADENOCARCINOMA, GLEASON GRADES 3+3, 0.7 CM"<br>
+                <span class="has-text-warning">⚠ Extracted value: NaN (linear measurement instead of percentage)</span></li>
+          </ul>
           
-          <div class="publication-video">
-            <!-- Youtube embed code here -->
-            <iframe src="https://www.youtube.com/embed/JkaxUblCGz0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <p class="has-text-weight-semibold">Decision: Re-extract</p>
+          <p class="has-text-info">Reasoning: The feature extraction is mostly accurate for notes that explicitly state percentage involvement, but there are missing values when pathology reports use linear measurements instead of percentages. Both formats represent the same clinical concept (tumor burden), so extraction logic should handle both formats.</p>
+          
+          <p class="has-text-weight-semibold">Updated Instructions:</p>
+          <p class="has-text-info">"Extract percentage from phrases like 'COMPRISING 75% OF THE CORE'. When percentage not provided but linear measurement available, calculate percentage by dividing tumor length by total core length from gross description section."</p>
+        </div>
+        
+        <p><strong>Validation Attempt #2:</strong></p>
+        <div class="box">
+          <p class="has-text-weight-semibold">Agent Analysis:</p>
+          <p>Re-checking extraction after updated instructions:</p>
+          <ul>
+            <li>Note 39: Cancer length 2mm, Total core 0.8cm<br>
+                <span class="has-text-danger">✗ Extracted value: 250.0 (should be 25)</span></li>
+            <li>Note 0: "COMPRISING 50% OF THE CORE"<br>
+                <span class="has-text-success">✓ Extracted value: 50.0 (correct)</span></li>
+            <li>Note 107: "INVOLVING 1.0 cm of 1 CM CORE"<br>
+                <span class="has-text-success">✓ Extracted value: 100.0 (correct calculation)</span></li>
+          </ul>
+          
+          <p class="has-text-weight-semibold">Decision: Re-extract</p>
+          <p class="has-text-info">Reasoning: Contains significant calculation error (250% instead of 25%). Extraction logic handles both explicit percentages and calculated values from measurements, but needs fixing to ensure values never exceed 100%.</p>
+          
+          <p class="has-text-weight-semibold">Updated Instructions:</p>
+          <p class="has-text-info">"Extract percentage values and calculate from measurements. Ensure all calculated percentages are capped at 100% maximum. Double-check all calculations to prevent decimal place errors."</p>
+        </div>
+        
+        <p><strong>Validation Attempt #3:</strong></p>
+        <div class="box">
+          <p class="has-text-weight-semibold">Agent Analysis:</p>
+          <p>Final validation after re-extraction:</p>
+          <ul>
+            <li>Note 0: "COMPRISING 50% OF THE CORE" → 50.0 ✓</li>
+            <li>Note 5: "comprising 100% of 1/1 core" → 100.0 ✓</li>
+            <li>Note 14: "NO PROSTATIC GLANDULAR TISSUE IDENTIFIED" → NaN ✓</li>
+            <li>Note 6: "NO SIGNIFICANT ABNORMALITY" → 0.0 ✓</li>
+          </ul>
+          
+          <p class="has-text-weight-semibold">Decision: Proceed</p>
+          <p class="has-text-success">✓ Feature extraction validated successfully</p>
+          <p>• Missing value rate: 2.04% (acceptably low)</p>
+          <p>• All values within valid range (0-100)</p>
+          <p>• Correctly handles explicit percentages, calculated values, and missing data</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Methods Comparison Overview -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Methods Compared</h2>
+    <p class="has-text-centered subtitle">Overview of all feature generation approaches evaluated in this study</p>
+    
+    <div class="columns is-multiline">
+      <!-- Manual CFG -->
+      <div class="column is-6">
+        <div class="box" style="height: 100%; border-left: 4px solid #f59e0b;">
+          <h4 class="title is-5" style="color: #f59e0b;">
+            <span class="icon"><i class="fas fa-user-md"></i></span>
+            Manual Clinician Feature Generation (CFG)
+          </h4>
+          <p class="has-text-justified">
+            <strong>Gold standard approach.</strong> Expert oncologists and data scientists collaborated over a year to manually curate clinically relevant features from medical records. Involves extensive per-patient clinical expertise for feature definition and extraction from biopsy reports.
+          </p>
+          <div class="tags">
+            <span class="tag is-success">High Performance</span>
+            <span class="tag is-danger">Not Scalable</span>
+            <span class="tag is-success">Interpretable</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SNOW -->
+      <div class="column is-6">
+        <div class="box" style="height: 100%; border-left: 4px solid #10b981;">
+          <h4 class="title is-5" style="color: #10b981;">
+            <span class="icon"><i class="fas fa-robot"></i></span>
+            SNOW (Scalable Note-to-Outcome Workflow)
+          </h4>
+          <p class="has-text-justified">
+            <strong>Our proposed method.</strong> Fully autonomous multi-agent LLM system with specialized agents for feature discovery, extraction, validation, post-processing, and aggregation. Requires no human intervention or clinical expertise.
+          </p>
+          <div class="tags">
+            <span class="tag is-success">High Performance</span>
+            <span class="tag is-success">Scalable</span>
+            <span class="tag is-success">Interpretable</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clinician-Guided LLM -->
+      <div class="column is-6">
+        <div class="box" style="height: 100%; border-left: 4px solid #3b82f6;">
+          <h4 class="title is-5" style="color: #3b82f6;">
+            <span class="icon"><i class="fas fa-user-cog"></i></span>
+            Clinician-Guided LLM (CLFG)
+          </h4>
+          <p class="has-text-justified">
+            <strong>Semi-automated approach.</strong> Uses LLMs with expert-written prompts to extract predefined clinician features. Includes detailed instructions based on manual processing experience, with post-processing following clinical rules.
+          </p>
+          <div class="tags">
+            <span class="tag is-warning">Good Performance</span>
+            <span class="tag is-warning">Partially Scalable</span>
+            <span class="tag is-success">Interpretable</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Baseline Features -->
+      <div class="column is-6">
+        <div class="box" style="height: 100%; border-left: 4px solid #6b7280;">
+          <h4 class="title is-5" style="color: #6b7280;">
+            <span class="icon"><i class="fas fa-table"></i></span>
+            Baseline Features
+          </h4>
+          <p class="has-text-justified">
+            <strong>Structured data only.</strong> Features from structured EHR sources requiring minimal clinical expertise: demographics, maximum pre-treatment PSA, and Charlson Comorbidity Index. Does not utilize unstructured clinical notes.
+          </p>
+          <div class="tags">
+            <span class="tag is-danger">Low Performance</span>
+            <span class="tag is-success">Scalable</span>
+            <span class="tag is-success">Interpretable</span>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-<!-- End youtube video -->
 
-
-<!-- Video carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Another Carousel</h2>
-      <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-video1">
-          <video poster="" id="video1" autoplay controls muted loop height="100%">
-            <!-- Your video file here -->
-            <source src="static/videos/carousel1.mp4"
-            type="video/mp4">
-          </video>
+    <!-- RFG Methods Summary -->
+    <div class="box" style="background-color: #f8fafc; border-left: 4px solid #8b5cf6;">
+      <h4 class="title is-5" style="color: #8b5cf6;">
+        <span class="icon"><i class="fas fa-brain"></i></span>
+        Representational Feature Generation (RFG) Methods
+      </h4>
+      <p class="has-text-justified">
+        <strong>14 automated NLP approaches</strong> that generate latent features from clinical text without human oversight. Despite extensive evaluation, none provided additional predictive value beyond baseline features.
+      </p>
+      
+      <div class="columns is-multiline" style="margin-top: 1rem;">
+        <div class="column is-4">
+          <h6 class="subtitle is-6"><strong>Traditional NLP</strong></h6>
+          <ul style="font-size: 0.9rem;">
+            <li>• Bag-of-Words (Classic & TF-IDF)</li>
+            <li>• 2-gram, 3-gram, 4-gram variants</li>
+          </ul>
         </div>
-        <div class="item item-video2">
-          <video poster="" id="video2" autoplay controls muted loop height="100%">
-            <!-- Your video file here -->
-            <source src="static/videos/carousel2.mp4"
-            type="video/mp4">
-          </video>
+        <div class="column is-4">
+          <h6 class="subtitle is-6"><strong>Transformer Models</strong></h6>
+          <ul style="font-size: 0.9rem;">
+            <li>• BERT, DistilBERT</li>
+            <li>• ClinicalBERT, Longformer</li>
+          </ul>
         </div>
-        <div class="item item-video3">
-          <video poster="" id="video3" autoplay controls muted loop height="100%">\
-            <!-- Your video file here -->
-            <source src="static/videos/carousel3.mp4"
-            type="video/mp4">
-          </video>
+        <div class="column is-4">
+          <h6 class="subtitle is-6"><strong>Advanced Embeddings</strong></h6>
+          <ul style="font-size: 0.9rem;">
+            <li>• Fine-tuned Mistral-7B-v0.3</li>
+            <li>• OpenAI text-embedding models</li>
+          </ul>
         </div>
+      </div>
+      
+      <div class="tags">
+        <span class="tag is-danger">Low Performance</span>
+        <span class="tag is-success">Scalable</span>
+        <span class="tag is-danger">Not Interpretable</span>
       </div>
     </div>
   </div>
 </section>
-<!-- End video carousel -->
 
-
-
-
-
-
-<!-- Paper poster -->
-<section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title">Poster</h2>
-
-      <iframe  src="static/pdfs/sample.pdf" width="100%" height="550">
-          </iframe>
-        
+<!-- Results Section -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Results</h2>
+    
+    <!-- Performance Chart First -->
+    <div class="columns is-centered">
+      <div class="column is-10">
+        <div id="performanceChart" class="result-chart"></div>
       </div>
     </div>
-  </section>
-<!--End paper poster -->
+    
+    <!-- Key Discoveries Below Chart -->
+    <div class="columns is-centered" style="margin-top: 2rem;">
+      <div class="column is-10">
+        <div class="box">
+          <h4 class="title is-4 has-text-centered">Key Discoveries</h4>
+          
+          <div class="content key-discoveries">
+            <h5 class="title is-5">🎯 SNOW Matches Expert-Level Performance</h5>
+            <p class="has-text-justified">
+              SNOW achieved an AUC-ROC of <strong>0.761 ± 0.046</strong>, matching the gold-standard manual clinician feature generation (CFG) performance of <strong>0.771 ± 0.036</strong> without requiring any clinical expertise or human intervention. This represents the first demonstration of a fully automated system matching expert-driven performance for clinical feature generation.
+            </p>
+            
+            <h5 class="title is-5">🚀 Significant Improvement Over Baseline</h5>
+            <p class="has-text-justified">
+              All feature generation methods (except RFG) substantially outperformed baseline features alone (0.691 ± 0.079). SNOW provided a <strong>10.1% improvement in AUC-ROC</strong> over baseline, demonstrating the critical value of extracting information from unstructured clinical notes for outcome prediction.
+            </p>
+            
+            <h5 class="title is-5">📊 RFG Methods Failed to Provide Value</h5>
+            <p class="has-text-justified">
+              None of the 'RFG + baseline' approaches outperformed the baseline features alone. These results suggest that while RFG methods likely introduce new signal, they also increase the dimensionality of the feature space and may complicate model training in a small-sample setting with 147 patients. This added complexity makes the model harder to optimize effectively. Because they did not improve model performance, we excluded them from the performance plot above.
+            </p>
+            
+            <h5 class="title is-5">⚖️ Quality vs. Scalability Trade-off Resolved</h5>
+            <p class="has-text-justified">
+              The results demonstrate that SNOW successfully bridges the gap between clinical expertise and scalable automation. While manual CFG delivers the highest performance, SNOW achieves comparable results with full automation, eliminating the traditional trade-off between quality and scalability in clinical feature engineering.
+            </p>
+            
+            <h5 class="title is-5">🔍 Interpretable Feature Generation</h5>
+            <p class="has-text-justified">
+              Unlike black-box RFG methods, SNOW generates <strong>interpretable structured features</strong> that capture complex clinical information. The system autonomously discovered and validated features across 14 prostate regions, including Gleason scores, tumor percentages, and cancer presence indicators that are directly interpretable by clinicians.
+            </p>
+            
+            <h5 class="title is-5">🏥 Clinical Deployment Potential</h5>
+            <p class="has-text-justified">
+              The combination of expert-level performance, full automation, and clinical interpretability positions SNOW as a viable solution for real-world clinical deployment, potentially transforming how healthcare organizations leverage unstructured EHR data for predictive modeling at scale.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
 
 
 <!--BibTex citation -->
   <section class="section" id="BibTeX">
     <div class="container is-max-desktop content">
       <h2 class="title">BibTeX</h2>
-      <pre><code>BibTex Code Here</code></pre>
+      <pre><code>@article{wang2025snow,
+  title={Agent-Based Feature Generation from Clinical Notes for Outcome Prediction},
+  author={Wang, Jiayi and Vallon, Jacqueline Jil and Panjwani, Neil and Ling, Xi and 
+          Vij, Sushmita and Srinivas, Sandy and Leppert, John and 
+          Buyyounouski, Mark K and Bayati, Mohsen},
+  year={2025}
+}</code></pre>
     </div>
 </section>
 <!--End BibTex citation -->
@@ -307,6 +674,683 @@
 <!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
 
     <!-- End of Statcounter Code -->
+
+<script>
+// Workflow canvas variables
+let currentZoom = 1;
+let currentTransform = { x: 0, y: 0 };
+let isDragging = false;
+let dragStart = { x: 0, y: 0 };
+let selectedAgent = null;
+
+// Initialize workflow canvas
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait for D3 to be available
+  if (typeof d3 !== 'undefined') {
+    initializeWorkflowCanvas();
+  } else {
+    console.error('D3.js not loaded');
+  }
+});
+
+function initializeWorkflowCanvas() {
+  const svg = d3.select('#workflow-svg');
+  const canvas = document.getElementById('workflow-canvas');
+  
+  // Create the workflow diagram
+  createWorkflowDiagram(svg);
+  
+  // Add zoom and pan functionality
+  zoomBehavior = d3.zoom()
+    .scaleExtent([0.5, 3])
+    .on('zoom', function(event) {
+      const { transform } = event;
+      currentZoom = transform.k;
+      currentTransform = { x: transform.x, y: transform.y };
+      
+      d3.select('#workflow-group')
+        .attr('transform', `translate(${transform.x},${transform.y}) scale(${transform.k})`);
+      
+      updateZoomLevel();
+    });
+  
+  svg.call(zoomBehavior);
+  
+  // Center the diagram initially
+  // Set default zoom to 100% instead of resetting view
+  setTimeout(() => {
+    if (zoomBehavior) {
+      const svg = d3.select('#workflow-svg');
+      svg.call(zoomBehavior.transform, d3.zoomIdentity.scale(1));
+    }
+  }, 100);
+}
+
+function getSVGIcon(iconName, size = 16) {
+  const icons = {
+    'file-search': `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><circle cx="11.5" cy="14.5" r="2.5"/><path d="m13.25 16.25 1.5 1.5"/>`,
+    'cpu': `<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="m9 1 0 3"/><path d="m15 1 0 3"/><path d="m9 20 0 3"/><path d="m15 20 0 3"/><path d="m20 9 3 0"/><path d="m20 14 3 0"/><path d="m1 9 3 0"/><path d="m1 14 3 0"/>`,
+    'shield-check': `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>`,
+    'workflow': `<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M6 9v1a2 2 0 0 0 2 2h1m0 0h2m0 0h1a2 2 0 0 0 2-2V9m-6 6v1"/>`,
+    'check-circle': `<path d="m12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1z"/><path d="m9 12 2 2 4-4"/>`,
+    'x-circle': `<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>`
+  };
+  
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[iconName] || ''}</svg>`;
+}
+
+function createWorkflowDiagram(svg) {
+  const group = svg.select('#workflow-group');
+  
+  // Clear existing content but preserve background elements
+  group.selectAll('.workflow-node, .workflow-outcome, line[stroke], path[stroke], text[font-size]').remove();
+  
+  // Main workflow nodes
+  const nodes = [
+    { id: 'discovery', x: 50, y: 80, width: 200, height: 120, label: 'Feature Discovery Agent', color: '#3b82f6', icon: '🔍', description: 'Discovers and identifies relevant features from clinical data' },
+    { id: 'extraction', x: 320, y: 80, width: 200, height: 120, label: 'Feature Extraction Agent', color: '#10b981', icon: '⚙️', description: 'Extracts feature values from clinical notes and data' },
+    { id: 'validation', x: 590, y: 80, width: 200, height: 120, label: 'Feature Validation Agent', color: '#8b5cf6', icon: '✅', description: 'Validates extracted features and makes processing decisions' },
+    { id: 'postprocessing', x: 590, y: 280, width: 200, height: 120, label: 'Post-Processing Agent', color: '#f59e0b', icon: '🔧', description: 'Transforms and normalizes validated features' }
+  ];
+  
+  // Outcome nodes
+  const outcomes = [
+    { id: 'proceed', x: 950, y: 100, radius: 40, label: 'Proceed', color: '#059669', icon: 'check-circle', description: 'Feature ready for model training' },
+    { id: 'remove', x: 950, y: 200, radius: 40, label: 'Remove', color: '#dc2626', icon: 'x-circle', description: 'Feature discarded from analysis' }
+  ];
+  
+  // Draw connections first (so they appear behind nodes)
+  drawConnections(group);
+  
+  // Draw main workflow nodes
+  nodes.forEach(node => {
+    const nodeGroup = group.append('g')
+      .attr('class', 'workflow-node')
+      .attr('data-node-id', node.id)
+      .attr('cursor', 'pointer')
+      .on('click', function() {
+        // Clear previous selection
+        d3.selectAll('.selection-border').remove();
+        d3.selectAll('.workflow-node rect').attr('stroke', 'none').attr('stroke-width', 0);
+        d3.selectAll('.workflow-outcome circle').each(function() {
+          const currentOutcome = outcomes.find(o => o.id === d3.select(this.parentNode).attr('data-node-id'));
+          if (currentOutcome) {
+            d3.select(this).attr('stroke', currentOutcome.color).attr('stroke-width', 2);
+          }
+        });
+        
+        // Set new selection with double border (white inner, light blue outer)
+        selectedAgent = node.id;
+        const rect = d3.select(this).select('rect');
+        rect.attr('stroke', 'white').attr('stroke-width', 2);
+        
+        // Add outer light blue border by creating a second rect behind
+        const outerRect = d3.select(this).insert('rect', ':first-child')
+          .attr('x', node.x - 2)
+          .attr('y', node.y - 2)
+          .attr('width', node.width + 4)
+          .attr('height', node.height + 4)
+          .attr('rx', 10)
+          .attr('ry', 10)
+          .attr('fill', 'none')
+          .attr('stroke', '#60a5fa')
+          .attr('stroke-width', 2)
+          .attr('class', 'selection-border');
+        
+        showAgentDetails(node.id);
+      });
+    
+    // Node background with gradient
+    nodeGroup.append('rect')
+      .attr('x', node.x)
+      .attr('y', node.y)
+      .attr('width', node.width)
+      .attr('height', node.height)
+      .attr('rx', 8)
+      .attr('ry', 8)
+      .attr('fill', node.color)
+      .attr('stroke', 'none')
+      .attr('stroke-width', 0)
+      .attr('filter', 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))');
+    
+    // Icon (emoji)
+    nodeGroup.append('text')
+      .attr('x', node.x + 27)
+      .attr('y', node.y + 38)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '20px')
+      .text(node.icon);
+    
+    // Node title (white text on colored background)
+    const titleLines = node.label.split(' ');
+    let titleY = node.y + 30;
+    
+    // Handle specific cases for better text layout
+    if (node.id === 'postprocessing') {
+      // Post-Processing Agent - split differently
+      nodeGroup.append('text')
+        .attr('x', node.x + 50)
+        .attr('y', titleY)
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .attr('fill', 'white')
+        .text('Post-Processing');
+      
+      nodeGroup.append('text')
+        .attr('x', node.x + 50)
+        .attr('y', titleY + 18)
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .attr('fill', 'white')
+        .text('Agent');
+    } else {
+      // Other agents - use existing logic
+      nodeGroup.append('text')
+        .attr('x', node.x + 50)
+        .attr('y', titleY)
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .attr('fill', 'white')
+        .text(titleLines.slice(0, 2).join(' '));
+      
+      if (titleLines.length > 2) {
+        nodeGroup.append('text')
+          .attr('x', node.x + 50)
+          .attr('y', titleY + 18)
+          .attr('font-size', '16px')
+          .attr('font-weight', 'bold')
+          .attr('fill', 'white')
+          .text(titleLines.slice(2).join(' '));
+      }
+    }
+    
+    // Description text (white, smaller, wrapped)
+    const words = node.description.split(' ');
+    let line = '';
+    let lineNumber = 0;
+    const maxCharsPerLine = 30;
+    let descY = node.y + (node.id === 'postprocessing' || titleLines.length > 2 ? 75 : 60);
+    
+    words.forEach(word => {
+      const testLine = line + word + ' ';
+      
+      if (testLine.length > maxCharsPerLine && line !== '') {
+        nodeGroup.append('text')
+          .attr('x', node.x + 12)
+          .attr('y', descY + (lineNumber * 16))
+          .attr('font-size', '13px')
+          .attr('fill', 'white')
+          .attr('fill-opacity', 0.9)
+          .text(line.trim());
+        line = word + ' ';
+        lineNumber++;
+      } else {
+        line = testLine;
+      }
+    });
+    
+    // Add the last line
+    if (line.trim() !== '' && lineNumber < 3) { // Limit to 3 lines
+      nodeGroup.append('text')
+        .attr('x', node.x + 12)
+        .attr('y', descY + (lineNumber * 16))
+        .attr('font-size', '13px')
+        .attr('fill', 'white')
+        .attr('fill-opacity', 0.9)
+        .text(line.trim());
+    }
+  });
+  
+  // Draw outcome nodes
+  outcomes.forEach(outcome => {
+    const outcomeGroup = group.append('g')
+      .attr('class', 'workflow-outcome')
+      .attr('data-node-id', outcome.id)
+      .attr('cursor', 'pointer')
+      .on('click', function() {
+        // Clear previous selection
+        d3.selectAll('.selection-border').remove();
+        d3.selectAll('.workflow-node rect').attr('stroke', 'none').attr('stroke-width', 0);
+        d3.selectAll('.workflow-outcome circle').each(function() {
+          const currentOutcome = outcomes.find(o => o.id === d3.select(this.parentNode).attr('data-node-id'));
+          if (currentOutcome) {
+            d3.select(this).attr('stroke', currentOutcome.color).attr('stroke-width', 2);
+          }
+        });
+        
+        // Set new selection with double border (white inner, light blue outer)
+        selectedAgent = outcome.id;
+        const circle = d3.select(this).select('circle');
+        circle.attr('stroke', 'white').attr('stroke-width', 2);
+        
+        // Add outer light blue border by creating a second circle behind
+        const outerCircle = d3.select(this).insert('circle', ':first-child')
+          .attr('cx', outcome.x)
+          .attr('cy', outcome.y)
+          .attr('r', outcome.radius + 2)
+          .attr('fill', 'none')
+          .attr('stroke', '#60a5fa')
+          .attr('stroke-width', 2)
+          .attr('class', 'selection-border');
+        
+        showAgentDetails(outcome.id);
+      });
+    
+    // Outcome circle with gradient background
+    outcomeGroup.append('circle')
+      .attr('cx', outcome.x)
+      .attr('cy', outcome.y)
+      .attr('r', outcome.radius)
+      .attr('fill', 'white')
+      .attr('stroke', outcome.color)
+      .attr('stroke-width', 2)
+      .attr('filter', 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))');
+    
+    // Icon (SVG paths)
+    const iconSize = 20;
+    const iconGroup = outcomeGroup.append('g')
+      .attr('transform', `translate(${outcome.x}, ${outcome.y - 8})`);
+    
+    if (outcome.icon === 'check-circle') {
+      // Check circle icon
+      iconGroup.append('circle')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', 10)
+        .attr('fill', 'none')
+        .attr('stroke', outcome.color)
+        .attr('stroke-width', 2);
+      
+      iconGroup.append('path')
+        .attr('d', 'M-3 0 L-1 2 L4 -3')
+        .attr('fill', 'none')
+        .attr('stroke', outcome.color)
+        .attr('stroke-width', 2)
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-linejoin', 'round');
+    } else if (outcome.icon === 'x-circle') {
+      // X circle icon
+      iconGroup.append('circle')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', 10)
+        .attr('fill', 'none')
+        .attr('stroke', outcome.color)
+        .attr('stroke-width', 2);
+      
+      iconGroup.append('path')
+        .attr('d', 'M-4 -4 L4 4 M4 -4 L-4 4')
+        .attr('fill', 'none')
+        .attr('stroke', outcome.color)
+        .attr('stroke-width', 2)
+        .attr('stroke-linecap', 'round');
+    }
+    
+    // Outcome text
+    outcomeGroup.append('text')
+      .attr('x', outcome.x)
+      .attr('y', outcome.y + 18)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+      .attr('fill', '#1f2937')
+      .text(outcome.label);
+  });
+}
+
+function drawConnections(group) {
+  const connections = [
+    // Main horizontal flow: Discovery → Extraction → Validation
+    { from: { x: 250, y: 140 }, to: { x: 320, y: 140 }, color: '#6b7280', marker: 'arrowhead' },
+    { from: { x: 520, y: 140 }, to: { x: 590, y: 140 }, color: '#6b7280', marker: 'arrowhead' },
+    
+    // Validation to Proceed (straight dashed)
+    { from: { x: 790, y: 120 }, to: { x: 910, y: 100 }, color: '#6b7280', marker: 'arrowhead', dashed: true },
+    
+    // Validation to Remove (straight dashed)
+    { from: { x: 790, y: 160 }, to: { x: 910, y: 200 }, color: '#6b7280', marker: 'arrowhead', dashed: true },
+    
+    // Validation to Post-Processing (straight down)
+    { from: { x: 690, y: 200 }, to: { x: 690, y: 280 }, color: '#6b7280', marker: 'arrowhead', label: 'post-process', dashed: true },
+    
+    // Post-Processing back up to Validation (straight up)
+    { from: { x: 720, y: 280 }, to: { x: 720, y: 200 }, color: '#6b7280', marker: 'arrowhead' },
+    
+    // Re-extract feedback loop (straight line parallel to main flow)
+    { from: { x: 590, y: 160 }, to: { x: 520, y: 160 }, color: '#6b7280', marker: 'arrowhead', label: 're-extract', dashed: true }
+  ];
+  
+  connections.forEach(conn => {
+    if (conn.curved) {
+      let pathData;
+      
+      if (conn.curveType === 'up') {
+        // Curve upward for Proceed path
+        pathData = `M ${conn.from.x} ${conn.from.y} Q ${conn.from.x + 50} ${conn.from.y - 30} ${conn.to.x} ${conn.to.y}`;
+      } else if (conn.curveType === 'down') {
+        // Curve downward for Remove path
+        pathData = `M ${conn.from.x} ${conn.from.y} Q ${conn.from.x + 50} ${conn.from.y + 30} ${conn.to.x} ${conn.to.y}`;
+      } else if (conn.curveType === 'feedback') {
+        // Feedback curve from Validation back to Extraction
+        pathData = `M ${conn.from.x} ${conn.from.y} Q ${(conn.from.x + conn.to.x) / 2} ${conn.from.y - 50} ${conn.to.x} ${conn.to.y}`;
+      }
+      
+      const path = group.append('path')
+        .attr('d', pathData)
+        .attr('stroke', conn.color)
+        .attr('stroke-width', 2)
+        .attr('fill', 'none')
+        .attr('marker-end', `url(#${conn.marker})`);
+      
+      if (conn.dashed) {
+        path.attr('stroke-dasharray', '5,5');
+      }
+    } else {
+      // Straight line
+      const line = group.append('line')
+        .attr('x1', conn.from.x)
+        .attr('y1', conn.from.y)
+        .attr('x2', conn.to.x)
+        .attr('y2', conn.to.y)
+        .attr('stroke', conn.color)
+        .attr('stroke-width', 2)
+        .attr('marker-end', `url(#${conn.marker})`);
+      
+      if (conn.dashed) {
+        line.attr('stroke-dasharray', '5,5');
+      }
+    }
+    
+    // Add label if specified
+    if (conn.label) {
+      let labelX, labelY;
+      
+      if (conn.curved && conn.curveType === 'feedback') {
+        labelX = (conn.from.x + conn.to.x) / 2;
+        labelY = conn.from.y - 35;
+      } else if (conn.from.x === conn.to.x) {
+        // Vertical line
+        if (conn.label === 'post-process') {
+          labelX = conn.from.x - 50;
+        } else {
+          labelX = conn.from.x + 15;
+        }
+        labelY = (conn.from.y + conn.to.y) / 2;
+      } else {
+        labelX = (conn.from.x + conn.to.x) / 2;
+        // For re-extract line, place text below the line
+        if (conn.label === 're-extract') {
+          labelY = (conn.from.y + conn.to.y) / 2 + 20;
+        } else if (conn.label === 'post-process') {
+          labelY = (conn.from.y + conn.to.y) / 2 - 15;
+        } else {
+          labelY = (conn.from.y + conn.to.y) / 2 - 8;
+        }
+      }
+      
+      group.append('text')
+        .attr('x', labelX)
+        .attr('y', labelY)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'normal')
+        .attr('fill', conn.color)
+        .text(conn.label);
+    }
+  });
+}
+
+// Store the zoom behavior globally
+let zoomBehavior;
+
+// Zoom controls
+function zoomIn() {
+  if (zoomBehavior) {
+    const svg = d3.select('#workflow-svg');
+    const currentTransform = d3.zoomTransform(svg.node());
+    const newScale = Math.min(currentTransform.k * 1.2, 3);
+    
+    svg.transition().duration(300).call(
+      zoomBehavior.transform,
+      d3.zoomIdentity.translate(currentTransform.x, currentTransform.y).scale(newScale)
+    );
+  }
+}
+
+function zoomOut() {
+  if (zoomBehavior) {
+    const svg = d3.select('#workflow-svg');
+    const currentTransform = d3.zoomTransform(svg.node());
+    const newScale = Math.max(currentTransform.k * 0.8, 0.5);
+    
+    svg.transition().duration(300).call(
+      zoomBehavior.transform,
+      d3.zoomIdentity.translate(currentTransform.x, currentTransform.y).scale(newScale)
+    );
+  }
+}
+
+function resetView() {
+  if (zoomBehavior) {
+    const svg = d3.select('#workflow-svg');
+    const canvas = document.getElementById('workflow-canvas');
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    // Center the 1200x500 diagram in the canvas
+    const scale = Math.min(canvasRect.width / 1200, canvasRect.height / 500) * 0.8;
+    const x = (canvasRect.width - 1200 * scale) / 2;
+    const y = (canvasRect.height - 500 * scale) / 2;
+    
+    svg.transition().duration(500).call(
+      zoomBehavior.transform,
+      d3.zoomIdentity.translate(x, y).scale(scale)
+    );
+  }
+}
+
+function updateZoomLevel() {
+  const zoomLevelElement = document.getElementById('zoom-level');
+  if (zoomLevelElement) {
+    zoomLevelElement.textContent = Math.round(currentZoom * 100) + '%';
+  }
+}
+
+// Interactive agent details
+function showAgentDetails(agent) {
+  const details = {
+    'discovery': {
+      title: '🔍 Feature Discovery Agent',
+      description: `
+        <div class="agent-detail-section">
+          <h5 class="has-text-weight-bold" style="color: #3b82f6;">Primary Function</h5>
+          <p>Initiates the SNOW pipeline by scanning clinical notes corpus to propose structured variables that are clinically meaningful and suitable for outcome prediction modeling.</p>
+          
+          <h5 class="has-text-weight-bold" style="color: #3b82f6;">Key Capabilities</h5>
+          <ul>
+            <li><strong>Corpus Analysis:</strong> Scans clinical notes to identify potential features</li>
+            <li><strong>Clinical Relevance:</strong> Considers clinical context and prediction target when proposing features</li>
+            <li><strong>Data Integration:</strong> Excludes features already available from structured data sources</li>
+            <li><strong>Subgroup Detection:</strong> Identifies features specific to anatomical regions or repeated contexts</li>
+            <li><strong>Extraction Logic:</strong> Provides descriptive guidance and candidate extraction instructions</li>
+          </ul>
+        </div>
+      `
+    },
+    'extraction': {
+      title: '⚙️ Feature Extraction Agent',
+      description: `
+        <div class="agent-detail-section">
+          <h5 class="has-text-weight-bold" style="color: #10b981;">Primary Function</h5>
+          <p>Processes individual clinical notes to extract values for each proposed feature using instructions from discovery or validation agents.</p>
+          
+          <h5 class="has-text-weight-bold" style="color: #10b981;">Key Capabilities</h5>
+          <ul>
+            <li><strong>Note Processing:</strong> Analyzes individual clinical notes for feature extraction</li>
+            <li><strong>Instruction Following:</strong> Applies guidance from discovery agent or refined instructions from validation</li>
+            <li><strong>Value Parsing:</strong> Extracts raw, categorical, or computed values from unstructured text</li>
+            <li><strong>Format Handling:</strong> Manages various text formats, medical terminology, and reporting styles</li>
+            <li><strong>Patient Alignment:</strong> Outputs feature values aligned with proposed feature definitions</li>
+          </ul>
+          
+          <h5 class="has-text-weight-bold" style="color: #10b981;">Extraction Challenges</h5>
+          <p>Handles inconsistent reporting formats, varying terminology, different measurement units, and complex medical abbreviations across different institutions and time periods.</p>
+        </div>
+      `
+    },
+    'validation': {
+      title: '✅ Feature Validation Agent',
+      description: `
+        <div class="agent-detail-section">
+          <h5 class="has-text-weight-bold" style="color: #8b5cf6;">Primary Function</h5>
+          <p>Performs quality control on extracted values by reviewing samples against source notes to assess accuracy, completeness, and consistency.</p>
+          
+          <h5 class="has-text-weight-bold" style="color: #8b5cf6;">Decision Framework</h5>
+          <ul>
+            <li><strong>Proceed:</strong> Feature quality meets acceptance criteria - moves to final dataset</li>
+            <li><strong>Remove:</strong> Consistently fails quality checks - excluded from analysis</li>
+            <li><strong>Re-extract:</strong> Issues can be resolved with refined instructions</li>
+            <li><strong>Post-process:</strong> Requires transformation rather than re-extraction</li>
+          </ul>
+          
+          <h5 class="has-text-weight-bold" style="color: #8b5cf6;">Validation Process</h5>
+          <ul>
+            <li><strong>Sample Review:</strong> Examines representative cases of extracted values</li>
+            <li><strong>Source Verification:</strong> Cross-references values against original clinical notes</li>
+            <li><strong>Quality Metrics:</strong> Assesses missing value rates and extraction accuracy</li>
+            <li><strong>Iterative Refinement:</strong> Continues validation loops until standards are met</li>
+          </ul>
+          
+          <h5 class="has-text-weight-bold" style="color: #8b5cf6;">Example Validation</h5>
+          <p>For "percent_core_involvement", the agent detected decimal point errors (250% instead of 25%) and missing values when linear measurements were used instead of percentages, leading to refined extraction instructions.</p>
+        </div>
+      `
+    },
+    'postprocessing': {
+      title: '🔧 Post-Processing Agent',
+      description: `
+        <div class="agent-detail-section">
+          <h5 class="has-text-weight-bold" style="color: #f59e0b;">Primary Function</h5>
+          <p>Applies transformation logic such as normalization, relabeling, or binning when features require processing rather than re-extraction.</p>
+          
+          <h5 class="has-text-weight-bold" style="color: #f59e0b;">Transformation Types</h5>
+          <ul>
+            <li><strong>Normalization:</strong> Standardizes values across different measurement scales</li>
+            <li><strong>Relabeling:</strong> Converts categorical values to consistent naming conventions</li>
+            <li><strong>Binning:</strong> Groups continuous variables into meaningful clinical categories</li>
+            <li><strong>Unit Conversion:</strong> Standardizes measurements (e.g., mm to cm, percentages)</li>
+            <li><strong>Missing Value Handling:</strong> Applies clinical rules for incomplete data</li>
+          </ul>
+          
+          <h5 class="has-text-weight-bold" style="color: #f59e0b;">Integration with Validation</h5>
+          <p>Post-processed features are returned to the Feature Validation Agent for reassessment, maintaining the integrity of the validation loop until final quality standards are achieved.</p>
+          
+          <h5 class="has-text-weight-bold" style="color: #f59e0b;">Clinical Relevance</h5>
+          <p>Ensures all transformations follow medical guidelines and maintain clinical interpretability while improving data quality for machine learning models.</p>
+        </div>
+      `
+    },
+    'proceed': {
+      title: '✓ Proceed Outcome',
+      description: `
+        <div class="agent-detail-section">
+          <h5 class="has-text-weight-bold" style="color: #059669;">Decision Criteria</h5>
+          <p>Feature extraction quality meets all acceptance criteria and is ready for machine learning model training.</p>
+          
+          <h5 class="has-text-weight-bold has-text-success">Quality Standards Met</h5>
+          <ul>
+            <li><strong>Accuracy:</strong> Extracted values match source clinical notes</li>
+            <li><strong>Completeness:</strong> Missing value rate within acceptable clinical limits</li>
+            <li><strong>Consistency:</strong> Values follow expected patterns and distributions</li>
+            <li><strong>Clinical Relevance:</strong> Features capture meaningful clinical information</li>
+            <li><strong>Interpretability:</strong> Results can be understood and validated by clinicians</li>
+          </ul>
+          
+          <h5 class="has-text-weight-bold has-text-success">Next Steps</h5>
+          <p>Features move to final dataset compilation or aggregation step if they require combination with other base features (e.g., maximum values across anatomical regions).</p>
+        </div>
+      `
+    },
+    'remove': {
+      title: '✗ Remove Outcome',
+      description: `
+        <div class="agent-detail-section">
+          <h5 class="has-text-weight-bold has-text-danger">Decision Criteria</h5>
+          <p>Feature extraction consistently fails quality checks and cannot be resolved through re-extraction or post-processing.</p>
+          
+          <h5 class="has-text-weight-bold has-text-danger">Common Removal Reasons</h5>
+          <ul>
+            <li><strong>High Missing Rate:</strong> Too many patients lack the required information</li>
+            <li><strong>Extraction Errors:</strong> Systematic issues that cannot be programmatically resolved</li>
+            <li><strong>Clinical Irrelevance:</strong> Feature doesn't provide meaningful predictive value</li>
+            <li><strong>Data Quality Issues:</strong> Source documentation is too inconsistent or incomplete</li>
+            <li><strong>Technical Limitations:</strong> Information cannot be reliably extracted from unstructured text</li>
+          </ul>
+          
+          <h5 class="has-text-weight-bold has-text-danger">Impact</h5>
+          <p>Removed features are excluded from the final dataset to maintain overall data quality and model performance. This ensures only reliable, clinically meaningful features are used for outcome prediction.</p>
+        </div>
+      `
+    }
+  };
+  
+  const detailsDiv = document.getElementById('agent-details');
+  const titleDiv = document.getElementById('agent-title');
+  const descDiv = document.getElementById('agent-description');
+  
+  if (details[agent]) {
+    titleDiv.textContent = details[agent].title;
+    descDiv.innerHTML = details[agent].description;
+    detailsDiv.style.display = 'block';
+    
+    // Update active state
+    document.querySelectorAll('.workflow-node, .workflow-outcome').forEach(node => {
+      node.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+  }
+}
+
+// Create performance chart
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof Plotly !== 'undefined') {
+    const data = [{
+      x: ['Baseline', 'CLFG + Baseline', 'SNOW + Baseline', 'CFG + Baseline'],
+      y: [0.691, 0.732, 0.761, 0.771],
+      error_y: {
+        type: 'data',
+        array: [0.079, 0.051, 0.046, 0.036],
+        visible: true
+      },
+      type: 'bar',
+      marker: {
+        color: ['#6b7280', '#3b82f6', '#10b981', '#f59e0b']
+      },
+      hovertemplate: '<b>%{x}</b><br>AUC-ROC: %{y:.3f}±%{error_y.array:.3f}<extra></extra>',
+      text: ['0.691±0.079', '0.732±0.051', '0.761±0.046', '0.771±0.036'],
+      textposition: 'none'
+    }];
+    
+    const layout = {
+      title: 'Performance Comparison (AUC-ROC)',
+      yaxis: {
+        title: 'AUC-ROC Score',
+        range: [0.5, 0.9]
+      },
+      xaxis: {
+        title: 'Feature Sets'
+      },
+      showlegend: false,
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)'
+    };
+    
+    const chartDiv = document.getElementById('performanceChart');
+    if (chartDiv) {
+      Plotly.newPlot('performanceChart', data, layout, {responsive: true});
+    }
+  }
+});
+</script>
 
   </body>
   </html>
