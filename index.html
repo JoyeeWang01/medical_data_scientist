@@ -383,74 +383,121 @@
 <!-- Validation Example -->
 <section class="section" style="background-color: #f9fafb;">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Validation Process Example</h2>
-    <p class="has-text-centered subtitle">See how SNOW validates and refines feature extraction</p>
+    <h2 class="title is-3 has-text-centered">SNOW Feature Generation Example</h2>
+    <p class="has-text-centered subtitle">See how SNOW validates and automatically refines feature extraction</p>
     
-    <div class="validation-example">
-      <h4 class="title is-5">Feature: percent_core_involvement_left_apex_medial</h4>
-      
-      <div class="content">
-        <p><strong>Validation Attempt #1:</strong></p>
-        <div class="box">
-          <p class="has-text-weight-semibold">Agent Analysis:</p>
-          <p>Examining clinical notes with non-zero values to verify extraction accuracy:</p>
-          <ul>
-            <li>Note 0: "PROSTATIC ADENOCARCINOMA, GLEASON SCORE 3+3 = 6, COMPRISING 50% OF THE CORE"<br>
-                <span class="has-text-success">✓ Extracted value: 50.0 (matches exactly)</span></li>
-            <li>Note 2: "PROSTATIC ADENOCARCINOMA, GLEASON SCORE 3+4=7, INVOLVING 60% OF THE CORE"<br>
-                <span class="has-text-success">✓ Extracted value: 60.0 (matches exactly)</span></li>
-            <li>Note 74: "PROSTATE ADENOCARCINOMA, GLEASON SCORE 4 + 4 = 8, 1.0 CM"<br>
-                <span class="has-text-warning">⚠ Extracted value: NaN (no percentage, only length measurement)</span></li>
-            <li>Note 105: "PROSTATIC ADENOCARCINOMA, GLEASON GRADES 3+3, 0.7 CM"<br>
-                <span class="has-text-warning">⚠ Extracted value: NaN (linear measurement instead of percentage)</span></li>
-          </ul>
-          
-          <p class="has-text-weight-semibold">Decision: Re-extract</p>
-          <p class="has-text-info">Reasoning: The feature extraction is mostly accurate for notes that explicitly state percentage involvement, but there are missing values when pathology reports use linear measurements instead of percentages. Both formats represent the same clinical concept (tumor burden), so extraction logic should handle both formats.</p>
-          
-          <p class="has-text-weight-semibold">Updated Instructions:</p>
-          <p class="has-text-info">"Extract percentage from phrases like 'COMPRISING 75% OF THE CORE'. When percentage not provided but linear measurement available, calculate percentage by dividing tumor length by total core length from gross description section."</p>
+    <h4 class="title is-5" style="margin-top: 3rem;">Complete agent workflow for feature percent_core_involvement_left_apex_medial</h4>
+    
+    <div class="content">
+        <!-- Step 1: Feature Discovery -->
+        <div class="box" style="border-left: 4px solid #3b82f6;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-search"></i></span>
+            <strong>Step 1: Feature Discovery Agent</strong>
+          </h5>
+          <p><strong>Action:</strong> Defines new feature from clinical note analysis</p>
+          <p><strong>Feature Definition:</strong> Percentage of biopsy core involved with cancer for left apex medial region. Higher percentage indicates greater tumor burden and is associated with higher risk of biological failure.</p>
+          <p><strong>Initial Instructions:</strong> "Extract the percentage value from phrases like 'COMPRISING X% OF THE CORE' or 'INVOLVING X% OF THE CORE'. Return as integer 0-100."</p>
         </div>
-        
-        <p><strong>Validation Attempt #2:</strong></p>
-        <div class="box">
-          <p class="has-text-weight-semibold">Agent Analysis:</p>
-          <p>Re-checking extraction after updated instructions:</p>
-          <ul>
-            <li>Note 39: Cancer length 2mm, Total core 0.8cm<br>
-                <span class="has-text-danger">✗ Extracted value: 250.0 (should be 25)</span></li>
-            <li>Note 0: "COMPRISING 50% OF THE CORE"<br>
-                <span class="has-text-success">✓ Extracted value: 50.0 (correct)</span></li>
-            <li>Note 107: "INVOLVING 1.0 cm of 1 CM CORE"<br>
-                <span class="has-text-success">✓ Extracted value: 100.0 (correct calculation)</span></li>
-          </ul>
-          
-          <p class="has-text-weight-semibold">Decision: Re-extract</p>
-          <p class="has-text-info">Reasoning: Contains significant calculation error (250% instead of 25%). Extraction logic handles both explicit percentages and calculated values from measurements, but needs fixing to ensure values never exceed 100%.</p>
-          
-          <p class="has-text-weight-semibold">Updated Instructions:</p>
-          <p class="has-text-info">"Extract percentage values and calculate from measurements. Ensure all calculated percentages are capped at 100% maximum. Double-check all calculations to prevent decimal place errors."</p>
+
+        <!-- Step 2: First Extraction -->
+        <div class="box" style="border-left: 4px solid #10b981;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-cog"></i></span>
+            <strong>Step 2: Feature Extraction Agent (Attempt 1)</strong>
+          </h5>
+          <p><strong>Action:</strong> Extracts feature values from all 147 patient notes using initial instructions</p>
+          <p><strong>Results:</strong> Successfully extracts percentages when explicitly stated, but returns NaN for notes with linear measurements (e.g., "1.0 CM" instead of percentage)</p>
         </div>
-        
-        <p><strong>Validation Attempt #3:</strong></p>
-        <div class="box">
-          <p class="has-text-weight-semibold">Agent Analysis:</p>
-          <p>Final validation after re-extraction:</p>
+
+        <!-- Step 3: First Validation -->
+        <div class="box" style="border-left: 4px solid #8b5cf6;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <strong>Step 3: Feature Validation Agent (Validation 1)</strong>
+          </h5>
+          <p><strong>Action:</strong> Reviews extracted values against source notes</p>
+          <p><strong>Analysis:</strong></p>
           <ul>
-            <li>Note 0: "COMPRISING 50% OF THE CORE" → 50.0 ✓</li>
-            <li>Note 5: "comprising 100% of 1/1 core" → 100.0 ✓</li>
-            <li>Note 14: "NO PROSTATIC GLANDULAR TISSUE IDENTIFIED" → NaN ✓</li>
-            <li>Note 6: "NO SIGNIFICANT ABNORMALITY" → 0.0 ✓</li>
+            <li>Note 0: "COMPRISING 50% OF THE CORE" → <span class="has-text-success">✓ 50.0 (correct)</span></li>
+            <li>Note 74: "PROSTATE ADENOCARCINOMA, GLEASON SCORE 4 + 4 = 8, 1.0 CM" → <span class="has-text-warning">⚠ NaN (missing)</span></li>
+            <li>Note 105: "PROSTATIC ADENOCARCINOMA, 0.7 CM" → <span class="has-text-warning">⚠ NaN (missing)</span></li>
           </ul>
-          
-          <p class="has-text-weight-semibold">Decision: Proceed</p>
-          <p class="has-text-success">✓ Feature extraction validated successfully</p>
-          <p>• Missing value rate: 2.04% (acceptably low)</p>
-          <p>• All values within valid range (0-100)</p>
-          <p>• Correctly handles explicit percentages, calculated values, and missing data</p>
+          <p><strong>Decision:</strong> <span class="tag is-warning">Re-extract</span></p>
+          <p><strong>Reasoning:</strong> Missing values when linear measurements available. Both formats represent tumor burden.</p>
+          <p><strong>Updated Instructions:</strong> "When percentage not provided but linear measurement available, calculate percentage by dividing tumor length by total core length from gross description section."</p>
+        </div>
+
+        <!-- Step 4: Second Extraction -->
+        <div class="box" style="border-left: 4px solid #10b981;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-cog"></i></span>
+            <strong>Step 4: Feature Extraction Agent (Attempt 2)</strong>
+          </h5>
+          <p><strong>Action:</strong> Re-extracts feature values using updated instructions that handle linear measurements</p>
+          <p><strong>Results:</strong> Now calculates percentages from linear measurements, but introduces calculation error in some cases</p>
+        </div>
+
+        <!-- Step 5: Second Validation -->
+        <div class="box" style="border-left: 4px solid #8b5cf6;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <strong>Step 5: Feature Validation Agent (Validation 2)</strong>
+          </h5>
+          <p><strong>Action:</strong> Reviews re-extracted values</p>
+          <p><strong>Analysis:</strong></p>
+          <ul>
+            <li>Note 39: Cancer 2mm, Core 0.8cm → <span class="has-text-danger">✗ 250.0% (should be 25%)</span></li>
+            <li>Note 107: "INVOLVING 1.0 cm of 1 CM CORE" → <span class="has-text-success">✓ 100.0 (correct)</span></li>
+          </ul>
+          <p><strong>Decision:</strong> <span class="tag is-warning">Re-extract</span></p>
+          <p><strong>Reasoning:</strong> Decimal point calculation error causing impossible values over 100%</p>
+          <p><strong>Updated Instructions:</strong> "Ensure all calculated percentages are capped at 100% maximum. Double-check all calculations to prevent decimal place errors."</p>
+        </div>
+
+        <!-- Step 6: Third Extraction -->
+        <div class="box" style="border-left: 4px solid #10b981;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-cog"></i></span>
+            <strong>Step 6: Feature Extraction Agent (Attempt 3)</strong>
+          </h5>
+          <p><strong>Action:</strong> Re-extracts feature values with decimal correction and 100% cap</p>
+          <p><strong>Results:</strong> All values now correctly extracted and within valid range (0-100%)</p>
+        </div>
+
+        <!-- Step 7: Final Validation -->
+        <div class="box" style="border-left: 4px solid #8b5cf6;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <strong>Step 7: Feature Validation Agent (Validation 3)</strong>
+          </h5>
+          <p><strong>Action:</strong> Final quality check on corrected values</p>
+          <p><strong>Analysis:</strong></p>
+          <ul>
+            <li>Note 0: "COMPRISING 50% OF THE CORE" → <span class="has-text-success">✓ 50.0</span></li>
+            <li>Note 5: "comprising 100% of 1/1 core" → <span class="has-text-success">✓ 100.0</span></li>
+            <li>Note 14: "NO PROSTATIC GLANDULAR TISSUE" → <span class="has-text-success">✓ NaN (appropriate)</span></li>
+            <li>Note 6: "NO SIGNIFICANT ABNORMALITY" → <span class="has-text-success">✓ 0.0</span></li>
+          </ul>
+          <p><strong>Quality Metrics:</strong></p>
+          <ul>
+            <li>Missing value rate: 2.04% (acceptable)</li>
+            <li>All values within valid range (0-100%)</li>
+            <li>Correctly handles explicit percentages, calculated values, and missing data</li>
+          </ul>
+          <p><strong>Decision:</strong> <span class="tag is-success">Proceed with Feature</span></p>
+        </div>
+
+        <!-- Final Outcome -->
+        <div class="box" style="border-left: 4px solid #059669; background-color: #f0fdf4;">
+          <h5 class="subtitle is-6">
+            <span class="icon"><i class="fas fa-check-double"></i></span>
+            <strong>Feature Accepted</strong>
+          </h5>
+          <p>After 3 validation cycles and 2 re-extractions, the feature <strong>percent_core_involvement_left_apex_medial</strong> successfully passes all quality checks and proceeds to the final dataset for model training.</p>
+          <p><strong>Total Process:</strong> 7 agent interactions (1 discovery + 3 extractions + 3 validations)</p>
         </div>
       </div>
-    </div>
   </div>
 </section>
 
@@ -1250,7 +1297,7 @@ function showAgentDetails(agent) {
       `
     },
     'proceed': {
-      title: '✓ Proceed Outcome',
+      title: '✓ Feature Accepted',
       description: `
         <div class="agent-detail-section">
           <h5 class="has-text-weight-bold" style="color: #059669;">Decision Criteria</h5>
@@ -1271,7 +1318,7 @@ function showAgentDetails(agent) {
       `
     },
     'remove': {
-      title: '✗ Remove Outcome',
+      title: '✗ Feature Removed',
       description: `
         <div class="agent-detail-section">
           <h5 class="has-text-weight-bold has-text-danger">Decision Criteria</h5>
